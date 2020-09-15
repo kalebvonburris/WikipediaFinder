@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/HitlerHunter/HitlerHunter.iml" filepath="$PROJECT_DIR$/HitlerHunter/HitlerHunter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/WikipediaFinder.iml" filepath="$PROJECT_DIR$/.idea/WikipediaFinder.iml" />
+    </modules>
+  </component>
+</project>
