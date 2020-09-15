@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="JWiki">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/HitlerHunter/src/main/resources/JWiki.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/HitlerHunter/src/main/resources/JWiki.jar!/" />
+    </SOURCES>
+  </library>
+</component>

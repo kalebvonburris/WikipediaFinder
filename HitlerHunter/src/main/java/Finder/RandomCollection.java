@@ -22,6 +22,7 @@ public class RandomCollection<E> {
         if (weight <= 0) {
             total += 1;
             map.put(total, result);
+            return this;
         }
         total += weight;
         map.put(total, result);
