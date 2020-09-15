@@ -27,21 +27,26 @@ public class HitlerFinder {
             ArrayList<String> path = new ArrayList<>();
             String randomChoice;
             // Initializing our current page.
-            while(true) {
+            here: while(true) {
                 Document currentPage = Jsoup.connect(randomArticle).get();
                 String linkName = AlgorithmManager.setRelevanceString(currentPage.location());
                 System.out.print(currentPage.location() + " -> ");
                 while (!currentPage.location().equals(targetArticle)) {
                     path.add(currentPage.location());
                     // Getting the links from the current Wikipedia article.
-                    links = algorithmManager.getLinks(currentPage.location());
+                    links = algorithmManager.getLinks(currentPage);
                     AlgorithmManager.setDistance(currentPage.location(), "1");
                     // Looping through the links and setting their relevance.
                     for (String link : links) {
                         if(path.contains(link)) {
+                            if(link.equals(targetArticle)){
+                                System.out.println(targetArticle);
+                                AlgorithmManager.writeToFile();
+                                continue here;
+                            }
                             if (links.size() == 1){
                                 linkName = AlgorithmManager.setRelevanceString(link);
-                                choices.add((double) (algorithmManager.checkRelevance(linkName) / algorithmManager.checkDistance(linkName)), link);
+                                choices.add((double) ((algorithmManager.checkRelevance(linkName) + (100 / algorithmManager.checkDistance(linkName)))), link);
                             }
                             continue;
                         }

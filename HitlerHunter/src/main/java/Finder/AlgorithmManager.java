@@ -76,8 +76,8 @@ public class AlgorithmManager {
 
         targetName = target.select("#firstHeading").text();
 
-        for (String[] article : Articles) {
-            if (article[0].equals(targetName)) {
+        for (int i = 0; i < Articles.length - 1; i++) {
+            if (Articles[i][0].equals(targetName)) {
                 return;
             }
         }
@@ -139,8 +139,8 @@ public class AlgorithmManager {
 
         targetName = target.select("#firstHeading").text();
 
-        for (String[] article : Articles) {
-            if (article.equals(targetName)) {
+        for (int i = 0; i < Articles.length - 1; i++) {
+            if (Articles[i][0].equals(targetName)) {
                 return targetName;
             }
         }
@@ -275,16 +275,15 @@ public class AlgorithmManager {
         throw new IOException();
     }
 
-    public ArrayList<String> getLinks(String url) throws IOException {
+    public ArrayList<String> getLinks(Document finder) throws IOException {
         ArrayList<String> returnLinks = new ArrayList<>();
 
-        Document finder = Jsoup.connect(url).get();
         Element body = finder.getElementById("content");
         Elements links = body.select("a[href]");
         String tempLink;
         for (Element link : links) {
             tempLink = link.attr("abs:href");
-            if (!tempLink.contains("https://en.wikipedia.org/wiki/") || tempLink.contains("Help:") || tempLink.contains("File:") || tempLink.contains("#") || tempLink.contains("Template:") || tempLink.contains("Wikipedia:") || tempLink.contains("Category:") || returnLinks.contains(tempLink) || tempLink.contains("Portal:") || tempLink.contains("Template_talk:")) {
+            if (!tempLink.contains("https://en.wikipedia.org/wiki/") || tempLink.contains("Special:") || tempLink.contains("Talk:") || tempLink.contains("Help:") || tempLink.contains("File:") || tempLink.contains("#") || tempLink.contains("Template:") || tempLink.contains("Wikipedia:") || tempLink.contains("Category:") || returnLinks.contains(tempLink) || tempLink.contains("Portal:") || tempLink.contains("Template_talk:")) {
                 continue;
             }
             returnLinks.add(tempLink);
