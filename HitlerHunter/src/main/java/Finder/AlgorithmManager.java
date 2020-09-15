@@ -53,6 +53,9 @@ public class AlgorithmManager {
                     writer.close();
                     return;
                 }
+                if (article[0] == "Book sources") {
+                    continue;
+                }
                 completeList.append(article[0]).append("&&").append(article[1]).append("&&").append(article[2]).append("\n");
             }
             System.out.println("Articles.length: " + Articles.length);

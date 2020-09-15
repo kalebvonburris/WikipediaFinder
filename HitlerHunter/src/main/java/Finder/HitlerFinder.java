@@ -21,8 +21,6 @@ public class HitlerFinder {
 
         try {
             RandomCollection<String> choices = new RandomCollection<>();
-            // Getting the target's article.
-            Jsoup.connect(targetArticle).get();
             algorithmManager.getCategories(targetArticle);
             // An ArrayList for storing the links to check through.
             ArrayList<String> links;
