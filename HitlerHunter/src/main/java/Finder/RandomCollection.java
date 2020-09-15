@@ -19,7 +19,10 @@ public class RandomCollection<E> {
     }
 
     public RandomCollection<E> add(double weight, E result) {
-        if (weight <= 0) return this;
+        if (weight <= 0) {
+            total += 1;
+            map.put(total, result);
+        }
         total += weight;
         map.put(total, result);
         return this;

@@ -12,13 +12,10 @@ public class AlgorithmManager {
 
     private static final ArrayList<String> Categories = new ArrayList<>();
     private static String[][] Articles = new String[1][3];
-    // Stores the targeted article.
-    private static String targetArticle;
     private static String targetName;
 
     // The constructor.
     public AlgorithmManager(String targetArticle) throws IOException {
-        AlgorithmManager.targetArticle = targetArticle;
         Document target = Jsoup.connect(targetArticle).get();
         targetName = target.select("#firstHeading").text();
         // Reading data.txt (if it exists).
@@ -49,17 +46,17 @@ public class AlgorithmManager {
     public static void writeToFile() {
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter("data.txt"));
-            String completeList = "";
-            for (int i = 0; i < Articles.length; i++) {
-                if (Articles[i][0] == null) {
-                    writer.write(completeList);
+            StringBuilder completeList = new StringBuilder();
+            for (String[] article : Articles) {
+                if (article[0] == null) {
+                    writer.write(completeList.toString());
                     writer.close();
                     return;
                 }
-                completeList = completeList + Articles[i][0] + "&&" + Articles[i][1] + "&&" + Articles[i][2] + "\n";
+                completeList.append(article[0]).append("&&").append(article[1]).append("&&").append(article[2]).append("\n");
             }
             System.out.println("Articles.length: " + Articles.length);
-            writer.write(completeList);
+            writer.write(completeList.toString());
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -76,8 +73,8 @@ public class AlgorithmManager {
 
         targetName = target.select("#firstHeading").text();
 
-        for (int i = 0; i < Articles.length; i++) {
-            if (Articles[i][0] == targetName) {
+        for (String[] article : Articles) {
+            if (article[0].equals(targetName)) {
                 return;
             }
         }
@@ -86,7 +83,7 @@ public class AlgorithmManager {
         // Grabbing the Categories
         Element ElementCategories = ElementsCategories.first();
         // Big ol thing that grabs the category section. Declaring ScriptString first in case the article doesn't have a "wgCategories" section.
-        String ScriptString = "";
+        String ScriptString;
         // If it doesn't have a "wgCategories" section, we just store it with 0 relevant categories.
         try {
             ScriptString = ElementCategories.data().substring(ElementCategories.data().indexOf("[\"", ElementCategories.data().indexOf("wgCategories")), ElementCategories.data().indexOf("\"],", ElementCategories.data().indexOf("wgCategories")));
@@ -127,8 +124,71 @@ public class AlgorithmManager {
         Articles = tempString;
         Articles[Articles.length - 2][0] = targetName;
         Articles[Articles.length - 2][1] = Integer.toString(relatedArticles);
-        Articles[Articles.length - 2][2] = "1";
-        return;
+        Articles[Articles.length - 2][2] = "100";
+    }
+
+    public static String setRelevanceString(String url) throws IOException {
+        // Getting the target's article.
+        Document target = Jsoup.connect(url).get();
+
+        // Grabbing the script which declares the categories
+        Elements ElementsCategories = target.getElementsByTag("script");
+
+        targetName = target.select("#firstHeading").text();
+
+        for (String[] article : Articles) {
+            if (article.equals(targetName)) {
+                return targetName;
+            }
+        }
+
+        String[] SplitStrings;
+        // Grabbing the Categories
+        Element ElementCategories = ElementsCategories.first();
+        // Big ol thing that grabs the category section. Declaring ScriptString first in case the article doesn't have a "wgCategories" section.
+        String ScriptString;
+        // If it doesn't have a "wgCategories" section, we just store it with 0 relevant categories.
+        try {
+            ScriptString = ElementCategories.data().substring(ElementCategories.data().indexOf("[\"", ElementCategories.data().indexOf("wgCategories")), ElementCategories.data().indexOf("\"],", ElementCategories.data().indexOf("wgCategories")));
+        } catch (Exception e) {
+            String[][] tempString = new String[Articles.length + 1][3];
+            for (int i = 0; i < Articles.length; i++) {
+                tempString[i][0] = Articles[i][0];
+                tempString[i][1] = Articles[i][1];
+                tempString[i][2] = Articles[i][2];
+            }
+            Articles = tempString;
+            Articles[Articles.length - 2][0] = targetName;
+            Articles[Articles.length - 2][1] = "0";
+            Articles[Articles.length - 2][2] = "100";
+            return targetName;
+        }
+        // Splitting the string so that we can get the categories.
+        SplitStrings = ScriptString.split("\",\"");
+        // Cleaning the Categories up because Wikipedia is mean.
+        int relatedArticles = 0;
+        for (String splits : SplitStrings) {
+            splits = splits.replace("\"", "");
+            splits = splits.replace(",", "");
+            splits = splits.replace("[", "");
+            splits = splits.replace("]", "");
+            // Adding the Categories.
+            if (Categories.contains(splits)) {
+                relatedArticles++;
+            }
+        }
+        // Some minor pointer shenanigans and setting the article up with its relevance.
+        String[][] tempString = new String[Articles.length + 1][3];
+        for (int i = 0; i < Articles.length; i++) {
+            tempString[i][0] = Articles[i][0];
+            tempString[i][1] = Articles[i][1];
+            tempString[i][2] = Articles[i][2];
+        }
+        Articles = tempString;
+        Articles[Articles.length - 2][0] = targetName;
+        Articles[Articles.length - 2][1] = Integer.toString(relatedArticles);
+        Articles[Articles.length - 2][2] = "100";
+        return targetName;
     }
 
     // Increments the distance to the target article for the given url.
@@ -189,36 +249,26 @@ public class AlgorithmManager {
     }
 
     // Checks to see how relevant an article is to the target.
-    public int checkRelevance(String url) throws IOException {
-        // Getting the target's article.
-        Document target = Jsoup.connect(url).get();
-
-        targetName = target.select("#firstHeading").text();
+    public int checkRelevance(String targetName) throws IOException {
         // If the article has yet to be run through setRelevance(), we return an error because we've never seen it.
-        Boolean finder = true;
         for (int i = 0; i < Articles.length - 1; i++) {
             if (Articles[i][0].equals(targetName)) {
                 return Integer.parseInt(Articles[i][1]);
             }
         }
-        System.out.println("Error: Article hasn't had its relevance set.");
+        System.out.println("\nError: Article " + targetName + " hasn't had its relevance set.");
         throw new IOException();
     }
 
     // Checks to see how relevant an article is to the target.
-    public int checkDistance(String url) throws IOException {
-        // Getting the target's article.
-        Document target = Jsoup.connect(url).get();
-
-        targetName = target.select("#firstHeading").text();
+    public int checkDistance(String targetName) throws IOException {
         // If the article has yet to be run through setRelevance(), we return an error because we've never seen it.
-        Boolean finder = true;
-        for (int i = 0; i < Articles.length; i++) {
-            if (Articles[i][0].equals(targetName)) {
-                return Integer.parseInt(Articles[i][2]);
+        for (String[] article : Articles) {
+            if (article[0].equals(targetName)) {
+                return Integer.parseInt(article[2]);
             }
         }
-        System.out.println("Error: Article hasn't had its relevance set.");
+        System.out.println("\nError: Article " + targetName + " hasn't had its relevance set.");
         throw new IOException();
     }
 
@@ -228,10 +278,10 @@ public class AlgorithmManager {
         Document finder = Jsoup.connect(url).get();
         Element body = finder.getElementById("content");
         Elements links = body.select("a[href]");
-        String tempLink = "";
+        String tempLink;
         for (Element link : links) {
             tempLink = link.attr("abs:href");
-            if (!tempLink.contains("https://en.wikipedia.org/wiki/") || tempLink.contains("Help:") || tempLink.contains("File:") || tempLink.contains("#") || tempLink.contains("Template:") || tempLink.contains("Wikipedia:") || tempLink.contains("Category:") || returnLinks.contains(tempLink)) {
+            if (!tempLink.contains("https://en.wikipedia.org/wiki/") || tempLink.contains("Help:") || tempLink.contains("File:") || tempLink.contains("#") || tempLink.contains("Template:") || tempLink.contains("Wikipedia:") || tempLink.contains("Category:") || returnLinks.contains(tempLink) || tempLink.contains("Portal:") || tempLink.contains("Template_talk:")) {
                 continue;
             }
             returnLinks.add(tempLink);
